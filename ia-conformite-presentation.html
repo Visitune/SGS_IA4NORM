@@ -377,9 +377,11 @@ body {
 .flip-grid-2 .fc-front,
 .flip-grid-2 .fc-back { min-height: 300px; }
 .flip-grid-3 .flip-card,
+.flip-grid-3 { --fc-h: 280px; }
+.flip-grid-3 .flip-card,
 .flip-grid-3 .flip-card .fci,
 .flip-grid-3 .fc-front,
-.flip-grid-3 .fc-back { min-height: 260px; }
+.flip-grid-3 .fc-back { min-height: var(--fc-h); }
 .card-accent-l { border-left: 3px solid var(--accent); }
 .card-accent-a { border-left: 3px solid var(--amber); }
 .card-accent-g { border-left: 3px solid var(--green); }
@@ -1449,7 +1451,7 @@ canvas { max-height: 280px !important; }
         <div class="slide-h1">Panorama des normes de <em>management</em></div>
         <div class="slide-desc">Chaque famille normative a ses spécificités, mais l'approche IA reste cohérente : LLM pour la documentation/analyse, code pour la mesure/prédiction.</div>
       </div>
-      <div class="flip-grid-3" style="margin-bottom:16px">
+      <div class="flip-grid-3" style="margin-bottom:16px; --fc-h: 300px;">
         <!-- ISO 9001 -->
         <div class="flip-card" onclick="this.classList.toggle('flipped')">
           <div class="fci">
@@ -1589,7 +1591,7 @@ canvas { max-height: 280px !important; }
         <div class="slide-h1">ISO 9001 : <em>qualité</em> augmentée par l'IA</div>
         <div class="slide-desc">De l'analyse de cause à la maîtrise des processus, l'IA transforme chaque clause de la norme qualité.</div>
       </div>
-      <div class="grid-2">
+      <div class="grid-2" style="--fc-h: 340px;">
         <div>
           <div class="section-label">Applications IA générative (LLM)</div>
           <div class="flip-grid-2" style="margin-bottom:4px">
@@ -1724,7 +1726,7 @@ canvas { max-height: 280px !important; }
         <div class="slide-h1">Environnement & <em>sécurité</em> : l'IA au service du terrain</div>
         <div class="slide-desc">La surveillance environnementale et la prévention des risques professionnels bénéficient tout autant des approches hybrides LLM + code.</div>
       </div>
-      <div class="grid-2">
+      <div class="grid-2" style="--fc-h: 320px;">
         <div>
           <div class="section-label" style="color:var(--green)">ISO 14001 — Environnement</div>
           <div class="flip-grid-2">
@@ -2048,7 +2050,7 @@ canvas { max-height: 280px !important; }
         <div class="slide-h1">L'audit assisté par IA : <em>avant, pendant, après</em></div>
         <div class="slide-desc">L'IA transforme les trois phases de l'audit — sans jamais remplacer le jugement professionnel de l'auditeur.</div>
       </div>
-      <div class="flip-grid-3" style="margin-bottom:16px">
+      <div class="flip-grid-3" style="margin-bottom:24px; --fc-h: 380px;">
         <!-- PHASE 1 -->
         <div class="flip-card" onclick="this.classList.toggle('flipped')">
           <div class="fci">
