@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IA & Conformité — Systèmes de Management</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0c0f1a;
+  --bg2: #111520;
+  --bg3: #161b2e;
+  --surface: rgba(255,255,255,0.04);
+  --surface2: rgba(255,255,255,0.08);
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #e8eaf2;
+  --text2: #8b91a8;
+  --text3: #5a6080;
+  --accent: #4f8ef7;
+  --accent2: #7c3aed;
+  --amber: #f59e0b;
+  --green: #10b981;
+  --red: #ef4444;
+  --cyan: #06b6d4;
+  --grad1: linear-gradient(135deg, #4f8ef7 0%, #7c3aed 100%);
+  --grad2: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  --grad3: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── LAYOUT ── */
+.app { display: flex; height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 260px; flex-shrink: 0;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.sidebar-logo {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-mark {
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--grad1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; color: white;
+}
+.logo-text { font-size: 13px; font-weight: 700; color: var(--text); letter-spacing: 0.03em; }
+.logo-sub { font-size: 10px; color: var(--text3); margin-top: 1px; }
+
+.sidebar-nav { flex: 1; overflow-y: auto; padding: 12px 0; }
+.sidebar-nav::-webkit-scrollbar { width: 3px; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.nav-section { padding: 6px 16px 4px; font-size: 9px; font-weight: 700; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 16px; cursor: pointer;
+  transition: all .15s; border-radius: 0;
+  position: relative;
+}
+.nav-item:hover { background: var(--surface); }
+.nav-item.active {
+  background: var(--surface2);
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; background: var(--accent);
+  border-radius: 0 2px 2px 0;
+}
+.nav-num {
+  width: 20px; height: 20px; border-radius: 4px;
+  background: var(--surface); display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: var(--text3);
+  flex-shrink: 0; font-family: 'JetBrains Mono', monospace;
+}
+.nav-item.active .nav-num { background: var(--accent); color: white; }
+.nav-label { font-size: 12px; color: var(--text2); line-height: 1.3; }
+.nav-item.active .nav-label { color: var(--text); }
+
+.sidebar-footer {
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+}
+.progress-track { height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
+.progress-fill { height: 100%; background: var(--grad1); border-radius: 2px; transition: width .3s; }
+.progress-label { font-size: 10px; color: var(--text3); display: flex; justify-content: space-between; }
+
+/* ── MAIN ── */
+.main { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+/* TOP BAR */
+.topbar {
+  height: 52px; flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px;
+  background: var(--bg2);
+}
+.topbar-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.topbar-meta { display: flex; align-items: center; gap: 16px; }
+.meta-tag {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--text3);
+  padding: 3px 8px; border-radius: 4px;
+  background: var(--surface); border: 1px solid var(--border);
+}
+.meta-tag i { color: var(--accent); font-size: 10px; }
+
+.nav-arrows { display: flex; gap: 6px; }
+.arrow-btn {
+  width: 28px; height: 28px; border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: var(--surface); color: var(--text2);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; transition: all .15s;
+}
+.arrow-btn:hover:not(:disabled) { background: var(--surface2); color: var(--text); }
+.arrow-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+/* SLIDE AREA */
+.slide-area { flex: 1; overflow-y: auto; padding: 32px 40px; }
+.slide-area::-webkit-scrollbar { width: 4px; }
+.slide-area::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.slide { display: none; animation: fadeSlide .25s ease; }
+.slide.active { display: block; }
+@keyframes fadeSlide { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── COMMON COMPONENTS ── */
+.slide-header { margin-bottom: 28px; }
+.slide-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 8px;
+}
+.slide-eyebrow i { font-size: 9px; }
+.slide-h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 38px; font-weight: 400;
+  color: var(--text); line-height: 1.1;
+  margin-bottom: 8px;
+}
+.slide-h1 em { font-style: italic; color: var(--accent); }
+.slide-desc { font-size: 14px; color: var(--text2); max-width: 680px; line-height: 1.6; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+.grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
+
+.card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px;
+  transition: border-color .2s;
+}
+.card:hover { border-color: var(--border2); }
+.card-sm { padding: 14px; }
+.card-accent-l { border-left: 3px solid var(--accent); }
+.card-accent-a { border-left: 3px solid var(--amber); }
+.card-accent-g { border-left: 3px solid var(--green); }
+.card-accent-r { border-left: 3px solid var(--red); }
+.card-accent-c { border-left: 3px solid var(--cyan); }
+
+.card-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 6px;
+  display: flex; align-items: center; gap: 5px;
+}
+.card-label i { font-size: 9px; }
+.card-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.card-body { font-size: 12px; color: var(--text2); line-height: 1.55; }
+
+.kpi-card {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 12px;
+  padding: 16px; text-align: center;
+}
+.kpi-val { font-size: 30px; font-weight: 700; font-family: 'DM Serif Display', serif; }
+.kpi-val.blue { color: var(--accent); }
+.kpi-val.amber { color: var(--amber); }
+.kpi-val.green { color: var(--green); }
+.kpi-val.cyan { color: var(--cyan); }
+.kpi-label { font-size: 11px; color: var(--text3); margin-top: 3px; line-height: 1.3; }
+
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600;
+}
+.tag-blue { background: rgba(79,142,247,.15); color: var(--accent); }
+.tag-amber { background: rgba(245,158,11,.15); color: var(--amber); }
+.tag-green { background: rgba(16,185,129,.15); color: var(--green); }
+.tag-red { background: rgba(239,68,68,.15); color: var(--red); }
+.tag-cyan { background: rgba(6,182,212,.15); color: var(--cyan); }
+.tag-purple { background: rgba(124,58,237,.15); color: #a78bfa; }
+
+.pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+
+ul.check-list { list-style: none; }
+ul.check-list li {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 12px; color: var(--text2); margin-bottom: 7px; line-height: 1.45;
+}
+ul.check-list li::before { content: '→'; color: var(--accent); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+.section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text3); display: flex; align-items: center; gap: 6px; margin-bottom: 12px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ── SPECIAL COMPONENTS ── */
+
+/* Quote block */
+.quote-block {
+  border-left: 3px solid var(--accent);
+  background: var(--surface);
+  padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0;
+}
+.quote-text { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--text); margin-bottom: 6px; font-style: italic; }
+.quote-attr { font-size: 11px; color: var(--text3); }
+
+/* Comparison block */
+.compare-wrap { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; align-items: stretch; margin: 8px 0; }
+.compare-col {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 12px;
+  padding: 20px; display: flex; flex-direction: column; gap: 8px;
+}
+.compare-col.left { border-right: none; border-radius: 12px 0 0 12px; }
+.compare-col.right { border-left: none; border-radius: 0 12px 12px 0; }
+.compare-vs {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; background: var(--bg3);
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: 0.05em;
+  writing-mode: vertical-rl;
+}
+.compare-head {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+}
+.compare-badge {
+  padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700;
+}
+.compare-badge.gen { background: rgba(79,142,247,.2); color: var(--accent); }
+.compare-badge.det { background: rgba(245,158,11,.2); color: var(--amber); }
+.compare-item { font-size: 12px; color: var(--text2); display: flex; gap: 7px; align-items: flex-start; }
+.compare-item::before { content: '✓'; font-size: 10px; flex-shrink: 0; margin-top: 2px; }
+.compare-col.left .compare-item::before { color: var(--accent); }
+.compare-col.right .compare-item::before { color: var(--amber); }
+
+/* Standards matrix */
+.matrix { width: 100%; border-collapse: collapse; font-size: 11px; }
+.matrix th {
+  background: var(--surface); padding: 8px 10px; text-align: left;
+  font-weight: 700; color: var(--text3); font-size: 10px; letter-spacing: 0.05em;
+  border: 1px solid var(--border);
+}
+.matrix td { padding: 7px 10px; border: 1px solid var(--border); color: var(--text2); vertical-align: top; }
+.matrix tr:hover td { background: var(--surface); }
+.matrix .norm-cell { font-weight: 600; color: var(--text); }
+.dot-yes { color: var(--green); font-size: 13px; }
+.dot-par { color: var(--amber); font-size: 13px; }
+.dot-no { color: var(--red); font-size: 13px; }
+
+/* Timeline */
+.timeline { position: relative; padding-left: 24px; }
+.timeline::before {
+  content: ''; position: absolute; left: 7px; top: 4px; bottom: 0;
+  width: 2px; background: var(--border2);
+}
+.timeline-item { position: relative; margin-bottom: 18px; }
+.timeline-dot {
+  position: absolute; left: -24px; top: 3px;
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid var(--accent); background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 7px; color: var(--accent);
+}
+.timeline-dot.done { background: var(--accent); color: white; }
+.timeline-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.timeline-body { font-size: 11px; color: var(--text2); line-height: 1.5; }
+
+/* Process flow */
+.flow-row { display: flex; align-items: center; gap: 0; margin: 12px 0; }
+.flow-step {
+  flex: 1; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 14px; text-align: center;
+}
+.flow-step i { font-size: 18px; color: var(--accent); margin-bottom: 6px; display: block; }
+.flow-step-title { font-size: 11px; font-weight: 600; color: var(--text); }
+.flow-step-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.flow-arrow { padding: 0 6px; color: var(--text3); font-size: 12px; flex-shrink: 0; }
+
+/* Highlight box */
+.highlight-box {
+  background: rgba(79,142,247,.07); border: 1px solid rgba(79,142,247,.2);
+  border-radius: 10px; padding: 14px 18px; margin: 14px 0;
+}
+.highlight-box.amber {
+  background: rgba(245,158,11,.07); border-color: rgba(245,158,11,.2);
+}
+.highlight-box.green {
+  background: rgba(16,185,129,.07); border-color: rgba(16,185,129,.2);
+}
+.highlight-box p { font-size: 12px; color: var(--text2); margin: 0; }
+.highlight-box strong { color: var(--text); }
+
+/* Code badge */
+.code-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(0,0,0,.3); border: 1px solid var(--border2);
+  border-radius: 4px; padding: 2px 7px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--amber);
+}
+
+/* ── SLIDE 1 : COVER ── */
+.cover-hero {
+  min-height: 75vh; display: flex; flex-direction: column; justify-content: center;
+  position: relative;
+}
+.cover-bg {
+  position: absolute; inset: -40px; z-index: 0;
+  background: radial-gradient(ellipse 60% 50% at 70% 40%, rgba(79,142,247,.08) 0%, transparent 70%),
+              radial-gradient(ellipse 40% 40% at 20% 70%, rgba(124,58,237,.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cover-content { position: relative; z-index: 1; }
+.cover-h1 {
+  font-family: 'DM Serif Display', serif; font-size: 56px; line-height: 1.05;
+  color: var(--text); margin-bottom: 20px;
+}
+.cover-h1 em { font-style: italic; color: var(--accent); }
+.cover-sub { font-size: 17px; color: var(--text2); max-width: 620px; line-height: 1.6; margin-bottom: 30px; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 36px; }
+.cover-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; max-width: 680px; }
+.cover-stat {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 14px;
+}
+.cover-stat-val { font-size: 26px; font-weight: 700; color: var(--accent); font-family: 'DM Serif Display', serif; }
+.cover-stat-lbl { font-size: 10px; color: var(--text3); margin-top: 2px; line-height: 1.3; }
+
+/* bar chart override */
+canvas { max-height: 220px !important; }
+
+/* Roadmap */
+.roadmap-phases { display: grid; grid-template-columns: repeat(6,1fr); gap: 10px; margin-top: 14px; }
+.rm-phase {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 14px 12px;
+  position: relative; overflow: hidden;
+}
+.rm-phase::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--grad1);
+}
+.rm-num { font-size: 24px; font-weight: 700; color: var(--border2); font-family: 'DM Serif Display', serif; margin-bottom: 4px; }
+.rm-title { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.rm-items { font-size: 10px; color: var(--text3); line-height: 1.5; }
+
+/* norm cards */
+.norm-card {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 18px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.norm-header { display: flex; align-items: center; gap: 10px; }
+.norm-badge {
+  width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; flex-shrink: 0; letter-spacing: -0.01em;
+}
+.norm-name { font-size: 15px; font-weight: 700; color: var(--text); }
+.norm-desc { font-size: 11px; color: var(--text3); }
+.norm-apps { display: flex; flex-wrap: wrap; gap: 5px; }
+.norm-app { font-size: 10px; color: var(--text3); background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; }
+
+/* risk matrix visual */
+.risk-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 3px; margin-top: 10px; }
+.risk-cell {
+  height: 40px; border-radius: 4px; display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 600; text-align: center;
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon"><i class="fas fa-brain"></i></div>
+      <div>
+        <div class="logo-text">IA & Conformité</div>
+        <div class="logo-sub">Systèmes de Management</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav" id="sideNav">
+    <div class="nav-section">Introduction</div>
+    <div class="nav-item active" data-slide="0">
+      <div class="nav-num">01</div>
+      <div class="nav-label">Couverture & enjeux</div>
+    </div>
+    <div class="nav-item" data-slide="1">
+      <div class="nav-num">02</div>
+      <div class="nav-label">Pourquoi l'IA maintenant ?</div>
+    </div>
+
+    <div class="nav-section">Comprendre l'IA</div>
+    <div class="nav-item" data-slide="2">
+      <div class="nav-num">03</div>
+      <div class="nav-label">IA générative vs déterministe</div>
+    </div>
+    <div class="nav-item" data-slide="3">
+      <div class="nav-num">04</div>
+      <div class="nav-label">LLM : forces & limites</div>
+    </div>
+    <div class="nav-item" data-slide="4">
+      <div class="nav-num">05</div>
+      <div class="nav-label">IA déterministe & code</div>
+    </div>
+    <div class="nav-item" data-slide="5">
+      <div class="nav-num">06</div>
+      <div class="nav-label">Architectures hybrides</div>
+    </div>
+
+    <div class="nav-section">Applications par norme</div>
+    <div class="nav-item" data-slide="6">
+      <div class="nav-num">07</div>
+      <div class="nav-label">Panorama normes ISO/GFSI</div>
+    </div>
+    <div class="nav-item" data-slide="7">
+      <div class="nav-num">08</div>
+      <div class="nav-label">ISO 9001 Qualité</div>
+    </div>
+    <div class="nav-item" data-slide="8">
+      <div class="nav-num">09</div>
+      <div class="nav-label">ISO 14001 & 45001</div>
+    </div>
+    <div class="nav-item" data-slide="9">
+      <div class="nav-num">10</div>
+      <div class="nav-label">ISO 22000 / GFSI</div>
+    </div>
+    <div class="nav-item" data-slide="10">
+      <div class="nav-num">11</div>
+      <div class="nav-label">Audit assisté IA</div>
+    </div>
+
+    <div class="nav-section">Mise en œuvre</div>
+    <div class="nav-item" data-slide="11">
+      <div class="nav-num">12</div>
+      <div class="nav-label">Métriques & validation</div>
+    </div>
+    <div class="nav-item" data-slide="12">
+      <div class="nav-num">13</div>
+      <div class="nav-label">Défis & garde-fous</div>
+    </div>
+    <div class="nav-item" data-slide="13">
+      <div class="nav-num">14</div>
+      <div class="nav-label">Roadmap d'implémentation</div>
+    </div>
+    <div class="nav-item" data-slide="14">
+      <div class="nav-num">15</div>
+      <div class="nav-label">Conclusion & next steps</div>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:6.7%"></div></div>
+    <div class="progress-label"><span id="progressLabel">1 / 15</span><span>2026</span></div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">Couverture & enjeux</div>
+    <div class="topbar-meta">
+      <div class="meta-tag"><i class="fas fa-users"></i> Responsables Qualité / HSE</div>
+      <div class="meta-tag"><i class="fas fa-calendar"></i> 2026</div>
+      <div class="nav-arrows">
+        <button class="arrow-btn" id="btnPrev" onclick="navigate(-1)" disabled><i class="fas fa-chevron-left"></i></button>
+        <button class="arrow-btn" id="btnNext" onclick="navigate(1)"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-area">
+
+    <!-- SLIDE 01 -->
+    <div class="slide active" id="slide-0">
+      <div class="cover-hero">
+        <div class="cover-bg"></div>
+        <div class="cover-content">
+          <div class="cover-h1">Intelligence Artificielle<br>& <em>Conformité</em> aux normes<br>de management</div>
+          <div class="cover-sub">Comment exploiter l'IA générative (LLM) et l'IA déterministe (Python, R, statistiques) pour transformer votre démarche de mise en conformité ISO, GFSI et au-delà.</div>
+          <div class="cover-tags">
+            <span class="tag tag-blue"><i class="fas fa-certificate"></i> ISO 9001</span>
+            <span class="tag tag-green"><i class="fas fa-leaf"></i> ISO 14001</span>
+            <span class="tag tag-amber"><i class="fas fa-hard-hat"></i> ISO 45001</span>
+            <span class="tag tag-red"><i class="fas fa-utensils"></i> ISO 22000 / GFSI</span>
+            <span class="tag tag-purple"><i class="fas fa-lock"></i> ISO 27001</span>
+            <span class="tag tag-cyan"><i class="fas fa-robot"></i> IA générative</span>
+            <span class="tag tag-amber"><i class="fas fa-code"></i> IA déterministe</span>
+          </div>
+          <div class="cover-stats">
+            <div class="cover-stat"><div class="cover-stat-val">5+</div><div class="cover-stat-lbl">Familles de normes couvertes</div></div>
+            <div class="cover-stat"><div class="cover-stat-val" style="color:var(--amber)">2</div><div class="cover-stat-lbl">Types d'IA complémentaires</div></div>
+            <div class="cover-stat"><div class="cover-stat-val" style="color:var(--green)">-60%</div><div class="cover-stat-lbl">Temps de préparation audit</div></div>
+            <div class="cover-stat"><div class="cover-stat-val" style="color:var(--cyan)">15</div><div class="cover-stat-lbl">Cas d'usage opérationnels</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="quote-block">
+        <div class="quote-text">"L'IA ne remplace pas l'expert en conformité — elle démultiplie sa capacité d'analyse, de documentation et de détection."</div>
+        <div class="quote-attr">Principe directeur de cette présentation</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 02 -->
+    <div class="slide" id="slide-1">
+      <div class="slide-header">
+        <div class="slide-eyebrow"><i class="fas fa-chart-line"></i> Contexte</div>
+        <div class="slide-h1">Pourquoi l'IA <em>maintenant</em> ?</div>
+        <div class="slide-desc">La complexité croissante des systèmes de management, la multiplication des exigences et la pression documentaire créent un besoin urgent d'automatisation intelligente.</div>
+      </div>
+      <div class="grid-3" style="margin-bottom:16px">
+        <div class="card card-accent-l">
+          <div class="card-label"><i class="fas fa-file-alt"></i> Pression documentaire</div>
+          <div class="card-title">Des milliers de preuves à gérer</div>
+          <div class="card-body">ISO 9001, 14001, 45001, 22000 simultanément : la gestion manuelle atteint ses limites. Un audit multi-normes mobilise plusieurs semaines de préparation.</div>
+        </div>
+        <div class="card card-accent-a">
+          <div class="card-label"><i class="fas fa-exclamation-triangle"></i> Risque de non-conformité</div>
+          <div class="card-title">Des NC coûteuses et évitables</div>
+          <div class="card-body">80% des non-conformités détectées en audit externe auraient pu être identifiées en amont avec des outils d'analyse systématiques.</div>
+        </div>
+        <div class="card card-accent-g">
+          <div class="card-label"><i class="fas fa-brain"></i> Maturité de l'IA</div>
+          <div class="card-title">Des outils accessibles en 2025-26</div>
+          <div class="card-body">LLM open-source, Python scientifique, bibliothèques statistiques : la barrière d'entrée technique a drastiquement baissé pour les équipes qualité.</div>
+        </div>
+      </div>
+      <div class="section-label">Transformation en cours</div>
+      <div class="flow-row">
+        <div class="flow-step"><i class="fas fa-file-alt"></i><div class="flow-step-title">Papier & Excel</div><div class="flow-step-sub">Gestion manuelle</div></div>
+        <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="flow-step"><i class="fas fa-database"></i><div class="flow-step-title">Numérisation</div><div class="flow-step-sub">QMS digitaux</div></div>
+        <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="flow-step"><i class="fas fa-chart-bar"></i><div class="flow-step-title">Analyse de données</div><div class="flow-step-sub">Python / R / BI</div></div>
+        <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="flow-step" style="border-color:var(--accent)"><i class="fas fa-robot" style="color:var(--accent)"></i><div class="flow-step-title" style="color:var(--accent)">IA générative</div><div class="flow-step-sub">LLM + RAG</div></div>
+        <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="flow-step" style="border-color:var(--amber)"><i class="fas fa-cogs" style="color:var(--amber)"></i><div class="flow-step-title" style="color:var(--amber)">IA déterministe</div><div class="flow-step-sub">Prédiction temps réel</div></div>
+      </div>
+      <div class="grid-4" style="margin-top:16px">
+        <div class="kpi-card"><div class="kpi-val blue">×3</div><div class="kpi-label">Vitesse de rédaction documentaire avec LLM</div></div>
+        <div class="kpi-card"><div class="kpi-val amber">95%</div><div class="kpi-label">Précision de détection IA déterministe (terrain)</div></div>
+        <div class="kpi-card"><div class="kpi-val green">-40%</div><div class="kpi-label">Réduction des rebuts qualité (prédiction ML)</div></div>
+        <div class="kpi-card"><div class="kpi-val cyan">24/7</div><div class="kpi-label">Surveillance continue des CCP / indicateurs</div></div>
+      </div>
+    </div>
+
+    <!-- SLIDE 03 -->
+    <div class="slide" id="slide-2">
+      <div class="slide-header">
+        <div class="slide-eyebrow"><i class="fas fa-balance-scale"></i> Fondamentaux</div>
+        <div class="slide-h1">IA <em>générative</em> vs IA <em>déterministe</em></div>
+        <div class="slide-desc">Une distinction fondamentale pour bien choisir l'outil adapté à chaque usage de conformité.</div>
+      </div>
+      <div class="compare-wrap" style="margin-bottom:16px">
+        <div class="compare-col left">
+          <div class="compare-head"><span class="compare-badge gen">IA Générative — LLM</span></div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Modèles de langage : GPT-4, Claude, Llama, Mistral…</div>
+          <div class="compare-item">Analyse et synthèse de documents (SOP, procédures, rapports)</div>
+          <div class="compare-item">Rédaction assistée : plans HACCP, analyses de risques, rapports d'audit</div>
+          <div class="compare-item">Réponses à des questions sur un référentiel (RAG sur vos normes)</div>
+          <div class="compare-item">Aide au raisonnement : analyse de cause racine (5 pourquoi, Ishikawa)</div>
+          <div class="compare-item">Formation : génération de quiz, cas pratiques, scenarios</div>
+          <div class="compare-item">Veille réglementaire : synthèse de textes, comparaison versions</div>
+          <hr class="divider" style="margin:10px 0">
+          <div style="font-size:11px;color:var(--text3);"><strong style="color:var(--red)">⚠ Limites :</strong> hallucinations, pas de calcul fiable, non-déterministe, boîte noire, ne doit pas piloter seul une décision critique</div>
+        </div>
+        <div class="compare-vs">VS</div>
+        <div class="compare-col right">
+          <div class="compare-head"><span class="compare-badge det">IA Déterministe — Code</span></div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Python, R, SQL, modèles ML supervisés…</div>
+          <div class="compare-item">Analyse statistique de données process (SPC, cartes de contrôle)</div>
+          <div class="compare-item">Prédiction et détection d'anomalies (ML : Random Forest, LSTM, SVM)</div>
+          <div class="compare-item">Inspection visuelle automatisée (vision par ordinateur, CNN)</div>
+          <div class="compare-item">Calcul de scores de risque reproductibles et auditables</div>
+          <div class="compare-item">Simulation Monte-Carlo pour analyses de risque quantitatives</div>
+          <div class="compare-item">Tableaux de bord KPI automatisés, alertes seuils process</div>
+          <hr class="divider" style="margin:10px 0">
+          <div style="font-size:11px;color:var(--text3);"><strong style="color:var(--amber)">⚠ Limites :</strong> nécessite des données de qualité, des compétences techniques, validation rigoureuse du modèle avant déploiement</div>
+        </div>
+      </div>
+      <div class="highlight-box">
+        <p><strong>Règle d'or :</strong> utilisez l'IA générative pour <strong>comprendre, rédiger et analyser</strong> (travail de connaissance), et l'IA déterministe pour <strong>mesurer, détecter et prédire</strong> (travail sur les données). Les deux sont complémentaires, rarement interchangeables.</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 04 -->
+    <div class="slide" id="slide-3">
+      <div class="slide-header">
+        <div class="slide-eyebrow"><i class="fas fa-comments"></i> IA Générative</div>
+        <div class="slide-h1">LLM : <em>forces réelles</em> & limites à connaître</div>
+        <div class="slide-desc">Comprendre ce que font vraiment les LLM pour les exploiter sans illusions dans vos démarches de conformité.</div>
+      </div>
+      <div class="grid-2">
+        <div>
+          <div class="section-label">Cas d'usage à haute valeur ajoutée</div>
+          <div class="grid-2" style="margin-bottom:12px">
+            <div class="card card-sm card-accent-l">
+              <div class="card-label"><i class="fas fa-file-alt"></i> Documentation</div>
+              <div class="card-title">Rédaction SOP / PRP</div>
+              <div class="card-body">Génère un premier jet structuré à partir d'un brief. Divise par 3 le temps de rédaction. Nécessite une relecture experte.</div>
+            </div>
+            <div class="card card-sm card-accent-l">
+              <div class="card-label"><i class="fas fa-search"></i> Analyse écarts</div>
+              <div class="card-title">Gap analysis ISO</div>
+              <div class="card-body">Compare votre système existant avec les exigences d'une nouvelle version normative. Identifie les clauses impactées.</div>
+            </div>
+            <div class="card card-sm card-accent-l">
+              <div class="card-label"><i class="fas fa-lightbulb"></i> Analyse de risque</div>
+              <div class="card-title">Brainstorming structuré</div>
+              <div class="card-body">Aide à identifier des causes potentielles, générer des scénarios de risque, structurer un AMDE ou un plan HACCP.</div>
+            </div>
+            <div class="card card-sm card-accent-l">
+              <div class="card-label"><i class="fas fa-graduation-cap"></i> Formation</div>
+              <div class="card-title">Modules & quiz adaptatifs</div>
+              <div class="card-body">Génère des cas pratiques contextualisés, des questions d'audit, des fiches de sensibilisation personnalisées.</div>
+            </div>
+          </div>
+          <div class="highlight-box">
+            <p><strong>RAG (Retrieval-Augmented Generation) :</strong> connectez le LLM à VOS documents (normes, procédures, historique d'audit) pour obtenir des réponses ancrées dans votre réalité, pas dans des généralités.</p>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Ce que le LLM ne fait PAS seul</div>
+          <div style="margin-bottom:12px">
+            <div class="card card-sm card-accent-r" style="margin-bottom:8px">
+              <div class="card-title" style="color:var(--red);font-size:13px">❌ Ne calcule pas de façon fiable</div>
+              <div class="card-body">Ne pas lui demander de faire des statistiques, des calculs de capabilité, des analyses SPC. Utilisez Python ou R pour cela.</div>
+            </div>
+            <div class="card card-sm card-accent-r" style="margin-bottom:8px">
+              <div class="card-title" style="color:var(--red);font-size:13px">❌ Hallucine des références</div>
+              <div class="card-body">Peut inventer des clauses normatives, des dates, des noms. Toujours vérifier les références réglementaires produites.</div>
+            </div>
+            <div class="card card-sm card-accent-r" style="margin-bottom:8px">
+              <div class="card-title" style="color:var(--red);font-size:13px">❌ Non-déterministe par nature</div>
+              <div class="card-body">Deux appels identiques peuvent donner des résultats différents. Incompatible avec les systèmes de contrôle process temps réel.</div>
+            </div>
+            <div class="card card-sm card-accent-r">
+              <div class="card-title" style="color:var(--red);font-size:13px">❌ Pas une source de vérité</div>
+              <div class="card-body">Le LLM propose, l'expert dispose. Toute décision critique (validation CCP, approbation document) requiert une revue humaine.</div>
+            </div>
+          </div>
+          <div class="highlight-box amber">
+            <p><strong>Bonne pratique :</strong> Toujours expliciter au LLM le contexte normatif exact (<span class="code-badge">ISO 9001:2015 §8.3</span>), fournir les documents de référence via RAG, et documenter l'usage IA dans votre système qualité.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 05 -->
+    <div class="slide" id="slide-4">
+      <div class="slide-header">
+        <div class="slide-eyebrow"><i class="fas fa-code"></i> IA Déterministe</div>
+        <div class="slide-h1">Python, R & modèles ML : <em>construire des outils</em></div>
+        <div class="slide-desc">L'approche déterministe consiste à écrire ou générer du code qui produit un résultat reproductible, explicable et validable.</div>
+      </div>
+      <div class="grid-2">
+        <div>
+          <div class="section-label">Outils statistiques & analyse de données</div>
+          <div class="grid-2" style="margin-bottom:12px">
+            <div class="card card-sm card-accent-a">
+              <div class="card-label"><i class="fas fa-chart-line"></i> SPC / MSP</div>
+              <div class="card-title">Cartes de contrôle</div>
+              <div class="card-body">Python : <span class="code-badge">numpy</span> <span class="code-badge">scipy</span> <span class="code-badge">plotly</span>. Détection de dérives, règles de Nelson, indices Cp/Cpk en temps réel.</div>
+            </div>
+            <div class="card card-sm card-accent-a">
+              <div class="card-label"><i class="fas fa-search"></i> Anomalie Detection</div>
+              <div class="card-title">Isolation Forest, LSTM</div>
+              <div class="card-body">Détecte les comportements anormaux dans des séries temporelles (températures, pH, poids) avant qu'ils deviennent des NC.</div>
+            </div>
+            <div class="card card-sm card-accent-a">
+              <div class="card-label"><i class="fas fa-eye"></i> Vision CNN</div>
+              <div class="card-title">Inspection visuelle</div>
+              <div class="card-body"><span class="code-badge">PyTorch</span> <span class="code-badge">OpenCV</span>. Détection corps étrangers, défauts de conditionnement, conformité étiquetage.</div>
+            </div>
+            <div class="card card-sm card-accent-a">
+              <div class="card-label"><i class="fas fa-random"></i> Monte-Carlo</div>
+              <div class="card-title">Simulation de risque</div>
+              <div class="card-body">Quantifie la probabilité d'un scénario de risque avec incertitude. <span class="code-badge">scipy.stats</span> <span class="code-badge">uncertainties</span>.</div>
+            </div>
+          </div>
+          <div class="section-label">Prédiction & machine learning</div>
+          <div class="grid-2">
+            <div class="card card-sm card-accent-a">
+              <div class="card-label"><i class="fas fa-clock"></i> Prédiction spoilage</div>
+              <div class="card-title">LSTM / ARIMA</div>
+              <div class="card-body">Prédiction DLV, fenêtres de conformité microbiologique selon température/humidité/CO₂.</div>
+            </div>
+            <div class="card card-sm card-accent-a">
+              <div class="card-label"><i class="fas fa-atom"></i> Spectroscopie</div>
+              <div class="card-title">SVM / PLS / RF</div>
+              <div class="card-body">Détection d'adultération, authentification produit, classification matière première. <span class="code-badge">scikit-learn</span>.</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Le "vibe coding" au service de la conformité</div>
+          <div class="card" style="margin-bottom:12px">
+            <div class="card-title" style="margin-bottom:8px">Générer du code avec un LLM</div>
+            <div class="card-body" style="margin-bottom:10px">La combinaison gagnante : utiliser un LLM (Claude, GPT-4) pour générer le code Python/R, puis l'exécuter pour obtenir des résultats déterministes et auditables.</div>
+            <div class="highlight-box" style="margin:0">
+              <p style="font-size:11px">Exemple : <em>"Écris-moi un script Python qui génère une carte de contrôle Xbar-R à partir d'un CSV de mesures de poids, avec les règles de Nelson et export PDF"</em> → code généré, validé, versionné dans votre QMS.</p>
+            </div>
+          </div>
+          <div class="section-label">Bonnes pratiques de validation</div>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot done"><i class="fas fa-check"></i></div>
+              <div class="timeline-title">Versionner le code (Git)</div>
+              <div class="timeline-body">Tout script d'analyse doit être versionné. La norme exige la maîtrise des outils de mesure : un algorithme en est un.</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot done"><i class="fas fa-check"></i></div>
+              <div class="timeline-title">Documenter les hypothèses du modèle</div>
+              <div class="timeline-body">Distribution des données, plage de validité, limites de détection : à inclure dans le dossier de validation IQ/OQ/PQ.</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-title">Revalidation périodique</div>
+              <div class="timeline-body">Tout modèle ML peut dériver (data drift). Planifier des revues périodiques avec métriques de performance.</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-title">Explicabilité (XAI)</div>
+              <div class="timeline-body">SHAP, LIME : l'auditeur doit pouvoir comprendre pourquoi le modèle a déclenché une alerte. Obligatoire pour la décision critique.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 06 -->
+    <div class="slide" id="slide-5">
+      <div class="slide-header">
+        <div class="slide-eyebrow"><i class="fas fa-layer-group"></i> Architecture</div>
+        <div class="slide-h1">Architectures <em>hybrides</em> : le meilleur des deux mondes</div>
+        <div class="slide-desc">Les systèmes les plus performants combinent LLM et modèles déterministes dans des pipelines complémentaires.</div>
+      </div>
+      <div class="grid-2" style="margin-bottom:16px">
+        <div class="card">
+          <div class="card-label"><i class="fas fa-project-diagram"></i> Architecture RAG + Analyse</div>
+          <div class="card-title" style="margin-bottom:10px">Cas : Préparation d'audit ISO 9001</div>
+          <div class="flow-row" style="flex-direction:column;gap:8px;align-items:stretch">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:28px;height:28px;border-radius:6px;background:rgba(79,142,247,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:10px;color:var(--accent);font-weight:700">1</span></div>
+              <div style="font-size:12px;color:var(--text2)"><strong style="color:var(--text)">LLM + RAG :</strong> ingère vos procédures, l'historique d'audit, les NC. Génère une checklist ciblée et identifie les zones à risque.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:28px;height:28px;border-radius:6px;background:rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:10px;color:var(--amber);font-weight:700">2</span></div>
+              <div style="font-size:12px;color:var(--text2)"><strong style="color:var(--text)">Python SPC :</strong> analyse automatique des données process (Cp, Cpk, tendances). Flags les KPI hors limites.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:28px;height:28px;border-radius:6px;background:rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:10px;color:var(--green);font-weight:700">3</span></div>
+              <div style="font-size:12px;color:var(--text2)"><strong style="color:var(--text)">LLM synthèse :</strong> consolide les résultats statistiques + gaps documentaires en un rapport préaudit narratif.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:28px;height:28px;border-radius:6px;background:rgba(6,182,212,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:10px;color:var(--cyan);font-weight:700">4</span></div>
+              <div style="font-size:12px;color:var(--text2)"><strong style="color:var(--text)">Validation humaine :</strong> l'expert revoit, valide, complète. L'IA ne décide pas — elle prépare.</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label"><i class="fas fa-shield-alt"></i> Architecture HACCP Digital</div>
+          <div class="card-title" style="margin-bottom:10px">Cas : Surveillance CCP temps réel</div>
+          <div class="flow-row" style="flex-direction:column;gap:8px;align-items:stretch">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:28px;height:28px;border-radius:6px;background:rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:10px;color:var(--amber);font-weight:700">1</span></div>
+              <div style="font-size:12px;color:var(--text2)"><strong style="color:var(--text)">Capteurs IoT / SCADA :</strong> température, pH, Aw, poids. Données en continu.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:28px;height:28px;border-radius:6px;background:rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:10px;color:var(--amber);font-weight:700">2</span></div>
+              <div style="font-size:12px;color:var(--text2)"><strong style="color:var(--text)">Moteur de règles (Python) :</strong> compare aux limites critiques, détecte dérives, déclenche alertes. 100% déterministe.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:28px;height:28px;border-radius:6px;background:rgba(79,142,247,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:10px;color:var(--accent);font-weight:700">3</span></div>
+              <div style="font-size:12px;color:var(--text2)"><strong style="color:var(--text)">LLM contextualisation :</strong> en cas d'alerte, génère automatiquement un message opérateur contextuel et la procédure de déviation applicable.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:28px;height:28px;border-radius:6px;background:rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:10px;color:var(--green);font-weight:700">4</span></div>
+              <div style="font-size:12px;color:var(--text2)"><strong style="color:var(--text)">Audit trail :</strong> chaque mesure, chaque alerte, chaque action corrective — horodatée, signée, immuable.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="highlight-box green">
+        <p><strong>Principe de séparation des rôles :</strong> le modèle déterministe prend les décisions de contrôle process (arrêt de ligne, alerte CCP). Le LLM assiste la communication, la documentation et l'analyse post-événement. Ne jamais inverser ces rôles.</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 07 -->
+    <div class="slide" id="slide-6">
+      <div class="slide-header">
+        <div class="slide-eyebrow"><i class="fas fa-certificate"></i> Normes</div>
+        <div class="slide-h1">Panorama des normes de <em>management</em></div>
+        <div class="slide-desc">Chaque famille normative a ses spécificités, mais l'approche IA reste cohérente : LLM pour la documentation/analyse, code pour la mesure/prédiction.</div>
+      </div>
+      <div class="grid-3" style="margin-bottom:14px">
+        <div class="norm-card">
+          <div class="norm-header">
+            <div class="norm-badge" style="background:rgba(79,142,247,.2);color:var(--accent)">9001</div>
+            <div><div class="norm-name">ISO 9001:2015</div><div class="norm-desc">Système de management de la qualité</div></div>
+          </div>
+          <div class="card-body">Contexte, parties intéressées, approche risque, PDCA, amélioration continue. Le plus déployé au monde.</div>
+          <div class="norm-apps">
+            <span class="norm-app">SPC/MSP</span><span class="norm-app">Analyse NC</span><span class="norm-app">Capabilité</span><span class="norm-app">LLM audit</span><span class="norm-app">RAG procédures</span>
+          </div>
+        </div>
+        <div class="norm-card">
+          <div class="norm-header">
+            <div class="norm-badge" style="background:rgba(16,185,129,.2);color:var(--green)">14001</div>
+            <div><div class="norm-name">ISO 14001:2015</div><div class="norm-desc">Système de management environnemental</div></div>
+          </div>
+          <div class="card-body">Impacts environnementaux, conformité réglementaire, performance énergétique, gestion des déchets.</div>
+          <div class="norm-apps">
+            <span class="norm-app">Suivi émissions</span><span class="norm-app">ML conso énergie</span><span class="norm-app">Veille réglementaire LLM</span><span class="norm-app">Reporting ESG</span>
+          </div>
+        </div>
+        <div class="norm-card">
+          <div class="norm-header">
+            <div class="norm-badge" style="background:rgba(245,158,11,.2);color:var(--amber)">45001</div>
+            <div><div class="norm-name">ISO 45001:2018</div><div class="norm-desc">Santé & sécurité au travail</div></div>
+          </div>
+          <div class="card-body">Identification des dangers, évaluation des risques professionnels, prévention des accidents.</div>
+          <div class="norm-apps">
+            <span class="norm-app">Analyse accident</span><span class="norm-app">Prédiction TF/TG</span><span class="norm-app">LLM DUERP</span><span class="norm-app">Vision sécurité</span>
+          </div>
+        </div>
+        <div class="norm-card">
+          <div class="norm-header">
+            <div class="norm-badge" style="background:rgba(239,68,68,.2);color:var(--red)">22000</div>
+            <div><div class="norm-name">ISO 22000 / GFSI</div><div class="norm-desc">Sécurité des aliments (BRCGS, IFS, FSSC)</div></div>
+          </div>
+          <div class="card-body">HACCP, PRP, traçabilité, analyse des dangers biologiques/chimiques/physiques. Exigences GFSI.</div>
+          <div class="norm-apps">
+            <span class="norm-app">CCP monitoring</span><span class="norm-app">Vision CNN</span><span class="norm-app">Spoilage LSTM</span><span class="norm-app">LLM SOP</span>
+          </div>
+        </div>
+        <div class="norm-card">
+          <div class="norm-header">
+            <div class="norm-badge" style="background:rgba(124,58,237,.2);color:#a78bfa">27001</div>
+            <div><div class="norm-name">ISO 27001:2022</div><div class="norm-desc">Sécurité de l'information (SMSI)</div></div>
+          </div>
+          <div class="card-body">Gestion des risques SI, contrôles Annex A, PSSI, continuité d'activité, conformité RGPD.</div>
+          <div class="norm-apps">
+            <span class="norm-app">Analyse logs ML</span><span class="norm-app">Détection intrusion</span><span class="norm-app">LLM PSSI</span><span class="norm-app">Gap analysis</span>
+          </div>
+        </div>
+        <div class="norm-card">
+          <div class="norm-header">
+            <div class="norm-badge" style="background:rgba(6,182,212,.2);color:var(--cyan)">HLS</div>
+            <div><div class="norm-name">Structure HLS commune</div><div class="norm-desc">Intégration multi-normes (IMS)</div></div>
+          </div>
+          <div class="card-body">Toutes les normes ISO SMQ partagent la même structure de haut niveau. Un seul système intégré possible.</div>
+          <div class="norm-apps">
+            <span class="norm-app">IMS intégré</span><span class="norm-app">Audit combiné</span><span class="norm-app">LLM cross-normes</span><span class="norm-app">KPI unifiés</span>
+          </div>
+        </div>
+      </div>
+      <div class="highlight-box">
+        <p><strong>Avantage structure HLS :</strong> un seul LLM entraîné sur toutes vos normes peut répondre à des questions multi-référentiels simultanément. Une analyse de risque peut alimenter ISO 9001 §6.1, ISO 14001 §6.1 et ISO 45001 §6.1 en même temps.</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 08 -->
+    <div class="slide" id="slide-7">
+      <div class="slide-header">
+        <div class="slide-eyebrow"><i class="fas fa-check-circle"></i> ISO 9001</div>
+        <div class="slide-h1">ISO 9001 : <em>qualité</em> augmentée par l'IA</div>
+        <div class="slide-desc">De l'analyse de cause à la maîtrise des processus, l'IA transforme chaque clause de la norme qualité.</div>
+      </div>
+      <div class="grid-2">
+        <div>
+          <div class="section-label">Applications LLM (IA générative)</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+            <div class="card card-sm card-accent-l">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">§4 — Contexte & parties intéressées</div>
+                <span class="tag tag-blue">LLM</span>
+              </div>
+              <div class="card-body">Analyse de textes stakeholders, synthèse des enjeux, mise à jour automatique de la matrice des parties intéressées.</div>
+            </div>
+            <div class="card card-sm card-accent-l">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">§6 — Analyse de risque (AMDEC, 5M)</div>
+                <span class="tag tag-blue">LLM</span>
+              </div>
+              <div class="card-body">Génère des scénarios de risque, complète une AMDEC, structure un 5 pourquoi. Accélère les ateliers d'analyse de cause.</div>
+            </div>
+            <div class="card card-sm card-accent-l">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">§7 — Gestion documentaire</div>
+                <span class="tag tag-blue">LLM + RAG</span>
+              </div>
+              <div class="card-body">Rédaction et mise à jour de procédures, détection d'incohérences documentaires, vérification des renvois inter-documents.</div>
+            </div>
+            <div class="card card-sm card-accent-l">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">§10 — Amélioration continue</div>
+                <span class="tag tag-blue">LLM</span>
+              </div>
+              <div class="card-body">Synthèse des NC récurrentes, suggestion d'actions correctives prioritaires, rédaction automatique de plans CAPA.</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Applications Code/ML (IA déterministe)</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+            <div class="card card-sm card-accent-a">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">§8 — Maîtrise des processus (SPC)</div>
+                <span class="tag tag-amber">Python/R</span>
+              </div>
+              <div class="card-body">Cartes de contrôle Xbar-R, CUSUM, EWMA. Indices Cp, Cpk, Pp, Ppk. Alertes automatiques sur dérives. <span class="code-badge">scipy</span> <span class="code-badge">plotly</span></div>
+            </div>
+            <div class="card card-sm card-accent-a">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">§9 — Évaluation des performances</div>
+                <span class="tag tag-amber">Python/BI</span>
+              </div>
+              <div class="card-body">Dashboards KPI automatisés, analyse de tendance, corrélations entre indicateurs. Export rapport automatique PDF.</div>
+            </div>
+            <div class="card card-sm card-accent-a">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">Prédiction de récurrence NC</div>
+                <span class="tag tag-amber">ML</span>
+              </div>
+              <div class="card-body">Random Forest sur historique NC : prédit les secteurs/processus à risque. Cible les audits internes là où ils sont utiles.</div>
+            </div>
+            <div class="card card-sm card-accent-a">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">MSA — Système de mesure</div>
+                <span class="tag tag-amber">Python/R</span>
+              </div>
+              <div class="card-body">R&R automatisé, calcul de biais, linéarité. <span class="code-badge">pyMSA</span>. Validation conformité ISO 10012 et §7.1.5.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 09 -->
+    <div class="slide" id="slide-8">
+      <div class="slide-header">
+        <div class="slide-eyebrow"><i class="fas fa-leaf"></i> ISO 14001 & 45001</div>
+        <div class="slide-h1">Environnement & <em>sécurité</em> : l'IA au service du terrain</div>
+        <div class="slide-desc">La surveillance environnementale et la prévention des risques professionnels bénéficient tout autant des approches hybrides LLM + code.</div>
+      </div>
+      <div class="grid-2">
+        <div>
+          <div class="section-label" style="color:var(--green)">ISO 14001 — Environnement</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+            <div class="card card-sm card-accent-g">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">Suivi des consommations (énergie, eau)</div>
+                <span class="tag tag-amber">Python/IoT</span>
+              </div>
+              <div class="card-body">Analyse de séries temporelles des consommations, détection d'anomalies (fuite, dérive), prédiction et objectifs de réduction. <span class="code-badge">statsmodels</span></div>
+            </div>
+            <div class="card card-sm card-accent-g">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">Veille réglementaire environnementale</div>
+                <span class="tag tag-blue">LLM</span>
+              </div>
+              <div class="card-body">Le LLM synthétise les nouvelles réglementations (REACH, DEE, REP), identifie les exigences applicables à votre activité.</div>
+            </div>
+            <div class="card card-sm card-accent-g">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">Reporting ESG automatisé</div>
+                <span class="tag tag-blue">LLM + Python</span>
+              </div>
+              <div class="card-body">Collecte automatique des données d'émission, calcul scope 1/2/3, narration automatique du rapport de développement durable.</div>
+            </div>
+            <div class="card card-sm card-accent-g">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">Analyse ACV simplifiée</div>
+                <span class="tag tag-amber">Python</span>
+              </div>
+              <div class="card-body">Bibliothèques <span class="code-badge">brightway2</span> ou calculs maison pour évaluer l'impact de changements de formulation / process.</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label" style="color:var(--amber)">ISO 45001 — Santé & sécurité</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="card card-sm card-accent-a">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">Analyse des accidents & presqu'accidents</div>
+                <span class="tag tag-blue">LLM + NLP</span>
+              </div>
+              <div class="card-body">Clustering des rapports d'accident (NLP), identification de patterns causaux récurrents, suggestion d'axes préventifs.</div>
+            </div>
+            <div class="card card-sm card-accent-a">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">Prédiction des taux de fréquence</div>
+                <span class="tag tag-amber">ML</span>
+              </div>
+              <div class="card-body">Modèle prédictif sur historique AT (conditions météo, planning, équipe, charge) pour anticiper les périodes à risque élevé.</div>
+            </div>
+            <div class="card card-sm card-accent-a">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">Vision IA — Détection EPI</div>
+                <span class="tag tag-amber">CNN</span>
+              </div>
+              <div class="card-body">Caméras intelligentes détectant l'absence de casque, gilet, lunettes. Alerte temps réel. <span class="code-badge">YOLO</span> <span class="code-badge">OpenCV</span>.</div>
+            </div>
+            <div class="card card-sm card-accent-a">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">DUERP assisté LLM</div>
+                <span class="tag tag-blue">LLM</span>
+              </div>
+              <div class="card-body">Mise à jour guidée du Document Unique, suggestion de cotations de risque, génération du plan d'action préventif.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10 -->
+    <div class="slide" id="slide-9">
+      <div class="slide-header">
+        <div class="slide-eyebrow"><i class="fas fa-utensils"></i> ISO 22000 / GFSI</div>
+        <div class="slide-h1">Sécurité alimentaire : <em>HACCP digital</em></div>
+        <div class="slide-desc">Le secteur alimentaire cumule toutes les applications : contrôle process temps réel, inspection visuelle, traçabilité et documentation intensive.</div>
+      </div>
+      <div class="grid-2" style="margin-bottom:14px">
+        <div>
+          <div class="section-label" style="color:var(--red)">Contrôle temps réel (déterministe)</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
+            <div class="card card-sm card-accent-r">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">Monitoring CCP / CL automatique</div>
+                <span class="tag tag-amber">Python/SCADA</span>
+              </div>
+              <div class="card-body">Règles déterministes sur données capteurs (T°, pH, Aw). Interlock automatique en cas de dépassement LC. Audit trail complet.</div>
+            </div>
+            <div class="card card-sm card-accent-r">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">Inspection visuelle CNN</div>
+                <span class="tag tag-amber">PyTorch/OpenCV</span>
+              </div>
+              <div class="card-body">Détection corps étrangers, défauts d'aspect, vérification étiquetage (OCR + règles allergènes). 96%+ de précision.</div>
+            </div>
+            <div class="card card-sm card-accent-r">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">Prédiction spoilage (LSTM)</div>
+                <span class="tag tag-amber">ML</span>
+              </div>
+              <div class="card-body">Modèle sur T°/HR/CO₂ prédit la DLV effective. Optimise le FEFO, réduit les pertes. Validation microbiologique requise.</div>
+            </div>
+          </div>
+          <div class="section-label" style="color:var(--accent)">Documentation & analyse (LLM)</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="card card-sm card-accent-l">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">Rédaction plan HACCP & PRP</div>
+                <span class="tag tag-blue">LLM + RAG</span>
+              </div>
+              <div class="card-body">Génère la structure du plan HACCP selon vos process, remplie avec vos données historiques. Actualise automatiquement lors des changements.</div>
+            </div>
+            <div class="card card-sm card-accent-l">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title">Analyse des dangers & arbre décisionnel</div>
+                <span class="tag tag-blue">LLM</span>
+              </div>
+              <div class="card-body">Aide à l'identification des dangers (bio/chim/phys/allergènes), à la cotation probabilité/gravité, à l'arbre décisionnel CCP.</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Matrice IA par référentiel GFSI</div>
+          <table class="matrix">
+            <tr>
+              <th>Référentiel</th>
+              <th>LLM docs</th>
+              <th>ML process</th>
+              <th>Vision IA</th>
+              <th>Traçabilité</th>
+            </tr>
+            <tr>
+              <td class="norm-cell">BRCGS v9</td>
+              <td><span class="dot-yes">●</span></td>
+              <td><span class="dot-yes">●</span></td>
+              <td><span class="dot-yes">●</span></td>
+              <td><span class="dot-yes">●</span></td>
+            </tr>
+            <tr>
+              <td class="norm-cell">IFS Food v8</td>
+              <td><span class="dot-yes">●</span></td>
+              <td><span class="dot-yes">●</span></td>
+              <td><span class="dot-par">◐</span></td>
+              <td><span class="dot-yes">●</span></td>
+            </tr>
+            <tr>
+              <td class="norm-cell">FSSC 22000 v6</td>
+              <td><span class="dot-yes">●</span></td>
+              <td><span class="dot-yes">●</span></td>
+              <td><span class="dot-par">◐</span></td>
+              <td><span class="dot-yes">●</span></td>
+            </tr>
+            <tr>
+              <td class="norm-cell">ISO 22000:2018</td>
+              <td><span class="dot-yes">●</span></td>
+              <td><span class="dot-par">◐</span></td>
+              <td><span class="dot-no">○</span></td>
+              <td><span class="dot-yes">●</span></td>
+            </tr>
+            <tr>
+              <td colspan="5" style="font-size:10px;color:var(--text3);padding-top:6px">● Forte valeur ajoutée &nbsp; ◐ Partielle &nbsp; ○ Non prioritaire</td>
+            </tr>
+          </table>
+          <div style="margin-top:12px">
+            <div class="section-label">Impact mesuré</div>
+            <div class="grid-2" style="gap:8px">
+              <div class="kpi-card"><div class="kpi-val red">-40%</div><div class="kpi-label">Rebuts qualité (vision CNN)</div></div>
+              <div class="kpi-card"><div class="kpi-val amber">99.5%</div><div class="kpi-label">Taux conformité audits GFSI</div></div>
+              <div class="kpi-card"><div class="kpi-val blue">×3</div><div class="kpi-label">Vitesse rédaction HACCP</div></div>
+              <div class="kpi-card"><div class="kpi-val green">-60%</div><div class="kpi-label">Temps préparation audit</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11 -->
+    <div class="slide" id="slide-10">
+      <div class="slide-header">
+        <div class="slide-eyebrow"><i class="fas fa-search"></i> Audit</div>
+        <div class="slide-h1">L'audit assisté par IA : <em>avant, pendant, après</em></div>
+        <div class="slide-desc">L'IA transforme les trois phases de l'audit — sans jamais remplacer le jugement professionnel de l'auditeur.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px">
+        <div class="card" style="border-top:3px solid var(--accent)">
+          <div class="card-label" style="color:var(--accent)"><i class="fas fa-calendar-alt"></i> Phase 1 — Avant l'audit</div>
+          <div class="card-title" style="margin-bottom:10px">Préparation intelligente</div>
+          <ul class="check-list">
+            <li><strong>LLM + RAG :</strong> analyse du système documentaire, identification des lacunes vs référentiel</li>
+            <li><strong>ML sur historique NC :</strong> carte de chaleur des risques par processus/clause</li>
+            <li><strong>LLM :</strong> génération de la checklist d'audit personnalisée et contextualisée</li>
+            <li><strong>Python :</strong> analyse statistique des indicateurs de performance depuis le dernier audit</li>
+          </ul>
+          <div class="pill-row">
+            <span class="tag tag-blue">RAG docs</span>
+            <span class="tag tag-amber">Heatmap NC</span>
+            <span class="tag tag-blue">Checklist LLM</span>
+          </div>
+        </div>
+        <div class="card" style="border-top:3px solid var(--amber)">
+          <div class="card-label" style="color:var(--amber)"><i class="fas fa-clipboard-check"></i> Phase 2 — Pendant l'audit</div>
+          <div class="card-title" style="margin-bottom:10px">Assistance terrain</div>
+          <ul class="check-list">
+            <li><strong>LLM mobile :</strong> Q&A instantané sur les exigences normatives pendant la visite</li>
+            <li><strong>Vision IA :</strong> photo + analyse automatique (conformité, étiquetage, rangement)</li>
+            <li><strong>Capteurs temps réel :</strong> accès aux dashboards Python/SCADA pendant l'audit</li>
+            <li><strong>LLM dictée :</strong> transcription et structuration des observations en temps réel</li>
+          </ul>
+          <div class="pill-row">
+            <span class="tag tag-blue">Q&A normatif</span>
+            <span class="tag tag-amber">Vision terrain</span>
+            <span class="tag tag-blue">Dictée structurée</span>
+          </div>
+        </div>
+        <div class="card" style="border-top:3px solid var(--green)">
+          <div class="card-label" style="color:var(--green)"><i class="fas fa-file-contract"></i> Phase 3 — Après l'audit</div>
+          <div class="card-title" style="margin-bottom:10px">Rapport & suivi</div>
+          <ul class="check-list">
+            <li><strong>LLM :</strong> rédaction du rapport d'audit à partir des observations collectées (NC par clause)</li>
+            <li><strong>Python :</strong> scoring de maturité automatique, comparaison avec référence sectorielle</li>
+            <li><strong>LLM :</strong> proposition de plan CAPA priorisé par criticité et facilité de mise en œuvre</li>
+            <li><strong>Tableau de bord :</strong> suivi automatique de l'avancement des actions correctives</li>
+          </ul>
+          <div class="pill-row">
+            <span class="tag tag-blue">Rapport auto</span>
+            <span class="tag tag-amber">Scoring maturité</span>
+            <span class="tag tag-blue">CAPA LLM</span>
+          </div>
+        </div>
+      </div>
+      <div class="highlight-box amber">
+        <p><strong>Point d'attention :</strong> l'IA en audit est un <strong>outil d'assistance au jugement</strong>, jamais un substitut. La conclusion de conformité, la cotation des NC et le niveau d'exigence restent la responsabilité de l'auditeur certifié. Documenter l'usage IA dans le rapport.</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 12 -->
+    <div class="slide" id="slide-11">
+      <div class="slide-header">
+        <div class="slide-eyebrow"><i class="fas fa-chart-bar"></i> Métriques</div>
+        <div class="slide-h1">Métriques de <em>performance</em> & validation des modèles</div>
+        <div class="slide-desc">Tout outil IA déployé en contexte normatif doit être validé, mesuré et revalidé périodiquement — exactement comme un équipement de mesure.</div>
+      </div>
+      <div class="grid-3" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-label"><i class="fas fa-bullseye"></i> Métriques modèles ML</div>
+          <div class="card-title" style="margin-bottom:10px">Classification & détection</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:11px;color:var(--text2)">Précision (Accuracy)</span>
+              <span style="font-size:12px;font-weight:700;color:var(--accent)">≥ 95%</span>
+            </div>
+            <div style="height:4px;background:var(--surface2);border-radius:2px"><div style="height:100%;width:95%;background:var(--accent);border-radius:2px"></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:11px;color:var(--text2)">Recall (Sensibilité)</span>
+              <span style="font-size:12px;font-weight:700;color:var(--green)">≥ 98%</span>
+            </div>
+            <div style="height:4px;background:var(--surface2);border-radius:2px"><div style="height:100%;width:98%;background:var(--green);border-radius:2px"></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:11px;color:var(--text2)">F1-Score</span>
+              <span style="font-size:12px;font-weight:700;color:var(--amber)">≥ 96%</span>
+            </div>
+            <div style="height:4px;background:var(--surface2);border-radius:2px"><div style="height:100%;width:96%;background:var(--amber);border-radius:2px"></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+              <span style="font-size:11px;color:var(--text2)">ROC-AUC</span>
+              <span style="font-size:12px;font-weight:700;color:var(--cyan)">≥ 0.97</span>
+            </div>
+          </div>
+          <div style="margin-top:10px;font-size:10px;color:var(--text3)">⚠ Pour sécurité alimentaire : maximiser le Recall (zéro faux négatif critique)</div>
+        </div>
+        <div class="card">
+          <div class="card-label"><i class="fas fa-cogs"></i> KPI process & conformité</div>
+          <div class="card-title" style="margin-bottom:10px">Indicateurs terrain</div>
+          <div class="grid-2" style="gap:6px">
+            <div class="kpi-card" style="padding:10px"><div class="kpi-val amber" style="font-size:18px">Cp≥1.33</div><div class="kpi-label">Capabilité process</div></div>
+            <div class="kpi-card" style="padding:10px"><div class="kpi-val green" style="font-size:18px">≤50ppm</div><div class="kpi-label">Taux défauts (objectif)</div></div>
+            <div class="kpi-card" style="padding:10px"><div class="kpi-val blue" style="font-size:18px">&lt;5j</div><div class="kpi-label">Délai clôture CAPA</div></div>
+            <div class="kpi-card" style="padding:10px"><div class="kpi-val cyan" style="font-size:18px">0</div><div class="kpi-label">NC majeures audit tiers</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label"><i class="fas fa-check-circle"></i> Validation IQ/OQ/PQ</div>
+          <div class="card-title" style="margin-bottom:10px">Protocole pour outils IA</div>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot done"><i class="fas fa-check"></i></div>
+              <div class="timeline-title">IQ — Installation Qualification</div>
+              <div class="timeline-body">Vérification que l'outil est installé et configuré selon les specs. Version, dépendances, environnement.</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot done"><i class="fas fa-check"></i></div>
+              <div class="timeline-title">OQ — Operational Qualification</div>
+              <div class="timeline-body">Tests fonctionnels : le modèle produit les résultats attendus sur jeu de test de référence.</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-title">PQ — Performance Qualification</div>
+              <div class="timeline-body">Validation sur données réelles de production. Performance conforme aux spécifications d'usage.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="highlight-box">
+          <p><strong>Data drift monitoring :</strong> un modèle ML peut se dégrader silencieusement quand les données changent (nouvelle matière première, changement process). Planifier des métriques de drift mensuel avec <span class="code-badge">evidently</span> ou <span class="code-badge">alibi-detect</span>.</p>
+        </div>
+        <div class="highlight-box amber">
+          <p><strong>Maîtrise des outils de surveillance (§7.1.5 ISO 9001) :</strong> un script Python d'analyse est un outil de mesure. Il doit être versionné, validé, étalonné sur jeu de référence, et revalidé après chaque modification.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 13 -->
+    <div class="slide" id="slide-12">
+      <div class="slide-header">
+        <div class="slide-eyebrow"><i class="fas fa-exclamation-triangle"></i> Risques</div>
+        <div class="slide-h1">Défis à anticiper & <em>garde-fous</em> à mettre en place</div>
+        <div class="slide-desc">L'IA en contexte normatif soulève des défis spécifiques que l'expert doit maîtriser pour rester crédible et conforme.</div>
+      </div>
+      <div class="grid-3">
+        <div>
+          <div class="section-label">Risques liés aux LLM</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
+            <div class="card card-sm card-accent-r">
+              <div class="card-title" style="color:var(--red);font-size:12px">Hallucinations normatives</div>
+              <div class="card-body">Le LLM peut inventer des clauses, des dates de révision, des exigences. <strong>Garde-fou :</strong> RAG obligatoire sur les textes normatifs officiels, vérification systématique des références citées.</div>
+            </div>
+            <div class="card card-sm card-accent-r">
+              <div class="card-title" style="color:var(--red);font-size:12px">Confiance excessive</div>
+              <div class="card-body">Le LLM est fluent et convaincant, même quand il se trompe. <strong>Garde-fou :</strong> former les utilisateurs au scepticisme critique, exiger la vérification des sources.</div>
+            </div>
+            <div class="card card-sm card-accent-r">
+              <div class="card-title" style="color:var(--red);font-size:12px">Confidentialité des données</div>
+              <div class="card-body">Ne pas envoyer de données sensibles (formules, audit interne) vers des API cloud non sécurisées. <strong>Garde-fou :</strong> LLM local ou contrat DPA/NDA avec le fournisseur.</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Risques liés aux modèles ML</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
+            <div class="card card-sm card-accent-a">
+              <div class="card-title" style="color:var(--amber);font-size:12px">Biais du jeu d'entraînement</div>
+              <div class="card-body">Un modèle entraîné sur données d'une saison ou d'un fournisseur généralise mal. <strong>Garde-fou :</strong> validation croisée, test sur données OOD, documentation du périmètre de validité.</div>
+            </div>
+            <div class="card card-sm card-accent-a">
+              <div class="card-title" style="color:var(--amber);font-size:12px">Boîte noire non explicable</div>
+              <div class="card-body">L'auditeur demande "pourquoi cette alerte ?" — "le modèle dit" n'est pas une réponse acceptée. <strong>Garde-fou :</strong> SHAP values, LIME, seuils documentés.</div>
+            </div>
+            <div class="card card-sm card-accent-a">
+              <div class="card-title" style="color:var(--amber);font-size:12px">Drift non détecté</div>
+              <div class="card-body">Performance du modèle se dégrade progressivement sans que personne ne s'en aperçoive. <strong>Garde-fou :</strong> monitoring automatique mensuel avec alerte si performance chute.</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Risques organisationnels</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
+            <div class="card card-sm" style="border-left:3px solid var(--cyan)">
+              <div class="card-title" style="color:var(--cyan);font-size:12px">Dépendance technologique</div>
+              <div class="card-body">Si l'outil IA tombe en panne, les équipes ne savent plus fonctionner. <strong>Garde-fou :</strong> maintenir les procédures manuelles de back-up, former à l'usage raisonné.</div>
+            </div>
+            <div class="card card-sm" style="border-left:3px solid var(--cyan)">
+              <div class="card-title" style="color:var(--cyan);font-size:12px">Gouvernance de l'IA</div>
+              <div class="card-body">Qui valide l'usage d'un LLM pour rédiger un document qualité ? <strong>Garde-fou :</strong> politique d'usage IA dans votre SMQ, rôles et responsabilités définis.</div>
+            </div>
+            <div class="card card-sm" style="border-left:3px solid var(--cyan)">
+              <div class="card-title" style="color:var(--cyan);font-size:12px">Résistance au changement</div>
+              <div class="card-body">Les équipes qualité peuvent voir l'IA comme une menace. <strong>Garde-fou :</strong> positionner l'IA comme amplificateur d'expertise, pas remplacant. Former et impliquer.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 14 -->
+    <div class="slide" id="slide-13">
+      <div class="slide-header">
+        <div class="slide-eyebrow"><i class="fas fa-route"></i> Roadmap</div>
+        <div class="slide-h1">Roadmap d'<em>implémentation</em> progressive</div>
+        <div class="slide-desc">6 étapes pour déployer l'IA dans votre système de management sans disruption et avec une valeur ajoutée prouvée à chaque phase.</div>
+      </div>
+      <div class="roadmap-phases" style="margin-bottom:16px">
+        <div class="rm-phase">
+          <div class="rm-num">01</div>
+          <div class="rm-title">Diagnostic</div>
+          <div class="rm-items">• Cartographie processus & risques<br>• Audit data readiness<br>• Évaluation compétences équipe<br>• Identification quick wins</div>
+          <div class="pill-row"><span class="tag tag-blue">4-6 semaines</span></div>
+        </div>
+        <div class="rm-phase">
+          <div class="rm-num">02</div>
+          <div class="rm-title">Cas d'usage prioritaires</div>
+          <div class="rm-items">• Sélection 2-3 cas haute valeur<br>• Analyse valeur vs complexité<br>• KPIs de succès définis<br>• Go/No-Go par cas</div>
+          <div class="pill-row"><span class="tag tag-blue">2-4 semaines</span></div>
+        </div>
+        <div class="rm-phase">
+          <div class="rm-num">03</div>
+          <div class="rm-title">Pilote terrain</div>
+          <div class="rm-items">• POC sur 1 processus / 1 site<br>• Validation avec utilisateurs<br>• Mesure des KPIs définis<br>• Protocole validation IQ/OQ</div>
+          <div class="pill-row"><span class="tag tag-amber">2-3 mois</span></div>
+        </div>
+        <div class="rm-phase">
+          <div class="rm-num">04</div>
+          <div class="rm-title">Industrialisation</div>
+          <div class="rm-items">• MLOps & infrastructure<br>• Documentation & procédures<br>• Formation des utilisateurs<br>• Intégration QMS</div>
+          <div class="pill-row"><span class="tag tag-amber">3-6 mois</span></div>
+        </div>
+        <div class="rm-phase">
+          <div class="rm-num">05</div>
+          <div class="rm-title">Déploiement</div>
+          <div class="rm-items">• Extension multi-processus<br>• Modèles fédérés multi-sites<br>• Templates réutilisables<br>• Gouvernance IA formalisée</div>
+          <div class="pill-row"><span class="tag tag-green">6-12 mois</span></div>
+        </div>
+        <div class="rm-phase">
+          <div class="rm-num">06</div>
+          <div class="rm-title">Amélioration continue</div>
+          <div class="rm-items">• Monitoring drift continu<br>• Retraining programmé<br>• Revues de performance<br>• Veille IA / normes</div>
+          <div class="pill-row"><span class="tag tag-green">Permanent</span></div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="highlight-box">
+          <p><strong>Commencer par l'IA générative :</strong> un LLM connecté à vos documents (RAG) offre un retour sur investissement immédiat avec zéro infrastructure ML complexe. C'est le meilleur point d'entrée pour convaincre la direction et les équipes qualité.</p>
+        </div>
+        <div class="highlight-box amber">
+          <p><strong>Critère de succès à phase 3 :</strong> un pilote réussi = les utilisateurs terrain adoptent l'outil spontanément et mesurent un gain de temps ou de qualité. Sans adoption, inutile de passer à l'échelle.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 15 -->
+    <div class="slide" id="slide-14">
+      <div class="slide-header">
+        <div class="slide-eyebrow"><i class="fas fa-flag-checkered"></i> Conclusion</div>
+        <div class="slide-h1">Conclusion & <em>recommandations stratégiques</em></div>
+        <div class="slide-desc">Ce qu'il faut retenir pour agir dès maintenant avec discernement.</div>
+      </div>
+      <div class="grid-2" style="margin-bottom:16px">
+        <div>
+          <div class="section-label">Les 5 messages clés</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+            <div class="card card-sm card-accent-l">
+              <div class="card-title" style="font-size:13px">1. Deux IA, deux rôles distincts</div>
+              <div class="card-body">LLM pour comprendre, rédiger et analyser. Code/ML pour mesurer, détecter et prédire. Ne confondez pas les deux — n'utilisez pas un LLM pour faire des statistiques.</div>
+            </div>
+            <div class="card card-sm card-accent-l">
+              <div class="card-title" style="font-size:13px">2. L'expert reste au centre</div>
+              <div class="card-body">L'IA démultiplie votre capacité, elle ne la remplace pas. Votre jugement normatif, votre expérience terrain et votre responsabilité restent entiers.</div>
+            </div>
+            <div class="card card-sm card-accent-l">
+              <div class="card-title" style="font-size:13px">3. La validation est non-négociable</div>
+              <div class="card-body">Tout outil IA dans un SMQ est un outil de mesure au sens de §7.1.5. Valider, versionner, revalider. Sans cela, vous créez une NC.</div>
+            </div>
+            <div class="card card-sm card-accent-l">
+              <div class="card-title" style="font-size:13px">4. Commencer petit, mesurer vite</div>
+              <div class="card-body">Un pilote RAG sur votre documentation existante peut être opérationnel en 2 semaines et livrer une valeur prouvée immédiatement.</div>
+            </div>
+            <div class="card card-sm card-accent-l">
+              <div class="card-title" style="font-size:13px">5. La structure HLS est un atout</div>
+              <div class="card-body">Un système IA bien construit peut servir ISO 9001, 14001, 45001 simultanément. Pensez intégration dès le départ.</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Priorités immédiates (quick wins)</div>
+          <div class="grid-2" style="margin-bottom:12px">
+            <div class="card card-sm card-accent-a">
+              <div class="card-label"><i class="fas fa-rocket"></i> Semaine 1-2</div>
+              <div class="card-title" style="font-size:12px">RAG sur vos normes & procédures</div>
+              <div class="card-body" style="font-size:10px">Connectez un LLM à vos documents. Q&A instantané sur votre SMQ. ROI immédiat.</div>
+            </div>
+            <div class="card card-sm card-accent-a">
+              <div class="card-label"><i class="fas fa-chart-line"></i> Semaine 2-4</div>
+              <div class="card-title" style="font-size:12px">Dashboard SPC Python</div>
+              <div class="card-body" style="font-size:10px">Script Python sur vos données de mesure existantes. Cartes de contrôle et Cp/Cpk automatiques.</div>
+            </div>
+            <div class="card card-sm card-accent-a">
+              <div class="card-label"><i class="fas fa-file-alt"></i> Mois 1-2</div>
+              <div class="card-title" style="font-size:12px">LLM pour rédaction CAPA</div>
+              <div class="card-body" style="font-size:10px">Génération de premier jet de plans CAPA à partir des observations d'audit. Gain de temps ×3.</div>
+            </div>
+            <div class="card card-sm card-accent-a">
+              <div class="card-label"><i class="fas fa-search"></i> Mois 2-3</div>
+              <div class="card-title" style="font-size:12px">Prédiction NC récurrentes</div>
+              <div class="card-body" style="font-size:10px">ML sur historique NC. Identifie les processus à risque avant l'audit. Cible les ressources.</div>
+            </div>
+          </div>
+          <div class="card" style="background:var(--bg2);border-color:rgba(79,142,247,.3)">
+            <div class="card-label" style="color:var(--accent)"><i class="fas fa-phone"></i> Prochaines étapes</div>
+            <div style="display:flex;gap:10px;margin-top:6px">
+              <div style="flex:1;text-align:center;padding:10px;background:var(--surface);border-radius:8px">
+                <div style="font-size:18px;font-weight:700;color:var(--accent);font-family:'DM Serif Display',serif">1</div>
+                <div style="font-size:10px;color:var(--text3)">Identifier votre cas d'usage le plus douloureux</div>
+              </div>
+              <div style="flex:1;text-align:center;padding:10px;background:var(--surface);border-radius:8px">
+                <div style="font-size:18px;font-weight:700;color:var(--accent);font-family:'DM Serif Display',serif">2</div>
+                <div style="font-size:10px;color:var(--text3)">LLM ou code ? Appliquer la règle d'or</div>
+              </div>
+              <div style="flex:1;text-align:center;padding:10px;background:var(--surface);border-radius:8px">
+                <div style="font-size:18px;font-weight:700;color:var(--accent);font-family:'DM Serif Display',serif">3</div>
+                <div style="font-size:10px;color:var(--text3)">Piloter, mesurer, décider</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="quote-block">
+        <div class="quote-text">"Le meilleur outil d'IA pour la conformité est celui que vos équipes utilisent vraiment, comprennent et font confiance — parce qu'il a été validé, documenté et expliqué."</div>
+        <div class="quote-attr">Principe fondateur d'une démarche IA responsable en système de management</div>
+      </div>
+    </div>
+
+  </div><!-- /slide-area -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const navItems = document.querySelectorAll('.nav-item');
+const titles = [
+  "Couverture & enjeux","Pourquoi l'IA maintenant ?",
+  "IA générative vs déterministe","LLM : forces & limites",
+  "IA déterministe & code","Architectures hybrides",
+  "Panorama normes ISO/GFSI","ISO 9001 Qualité",
+  "ISO 14001 & 45001","ISO 22000 / GFSI",
+  "Audit assisté IA","Métriques & validation",
+  "Défis & garde-fous","Roadmap d'implémentation",
+  "Conclusion & next steps"
+];
+let current = 0;
+
+function goTo(n) {
+  slides[current].classList.remove('active');
+  navItems[current].classList.remove('active');
+  current = n;
+  slides[current].classList.add('active');
+  navItems[current].classList.add('active');
+  navItems[current].scrollIntoView({block:'nearest',behavior:'smooth'});
+  document.getElementById('topbarTitle').textContent = titles[current];
+  document.getElementById('progressLabel').textContent = (current+1) + ' / ' + slides.length;
+  document.getElementById('progressFill').style.width = ((current+1)/slides.length*100) + '%';
+  document.getElementById('btnPrev').disabled = current === 0;
+  document.getElementById('btnNext').disabled = current === slides.length - 1;
+}
+
+function navigate(dir) { if(current+dir >= 0 && current+dir < slides.length) goTo(current+dir); }
+
+navItems.forEach((item, i) => { item.addEventListener('click', () => goTo(i)); });
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+  if(e.key === 'ArrowLeft' || e.key === 'ArrowUp') navigate(-1);
+});
+</script>
+</body>
+</html>
